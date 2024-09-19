@@ -1,9 +1,9 @@
-import { Repository } from 'typeorm';
+import { DataSource } from 'typeorm';
 import { UserInformation } from './user-information.entity';
 import { CreateUserInformationDto, UpdateUserInformationDto } from './user-information.dto';
 export declare class UserInformationService {
-    private readonly userInformationRepository;
-    constructor(userInformationRepository: Repository<UserInformation>);
+    private readonly dataSource;
+    constructor(dataSource: DataSource);
     create(createUserInformationDto: CreateUserInformationDto): Promise<UserInformation>;
     findAll(): Promise<UserInformation[]>;
     findOne(id: number): Promise<UserInformation>;

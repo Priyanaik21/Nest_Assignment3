@@ -1,11 +1,12 @@
-import { Repository } from 'typeorm';
+import { DataSource, Repository } from 'typeorm';
 import { Student } from './student.entity';
 import { CreateStudentDto, UpdateStudentDto } from './student.dto';
 import { UserInformation } from '../user-information/user-information.entity';
 export declare class StudentService {
+    private readonly dataSource;
     private readonly studentRepository;
     private readonly userInformationRepository;
-    constructor(studentRepository: Repository<Student>, userInformationRepository: Repository<UserInformation>);
+    constructor(dataSource: DataSource, studentRepository: Repository<Student>, userInformationRepository: Repository<UserInformation>);
     create(createStudentDto: CreateStudentDto): Promise<Student>;
     findAll(): Promise<Student[]>;
     findOne(id: number): Promise<Student>;

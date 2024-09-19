@@ -20,22 +20,41 @@ const student_instructor_entity_1 = require("./student-instructor.entity");
 const student_entity_1 = require("../student/student.entity");
 const instructor_entity_1 = require("../instructor/instructor.entity");
 let StudentInstructorService = class StudentInstructorService {
-    constructor(studentInstructorRepository, studentRepository, instructorRepository) {
+    constructor(dataSource, studentInstructorRepository, studentRepository, instructorRepository) {
+        this.dataSource = dataSource;
         this.studentInstructorRepository = studentInstructorRepository;
         this.studentRepository = studentRepository;
         this.instructorRepository = instructorRepository;
     }
     async create(createStudentInstructorDto) {
-        const student = await this.studentRepository.findOneBy({ studentId: createStudentInstructorDto.studentId });
-        const instructor = await this.instructorRepository.findOneBy({ instructorId: createStudentInstructorDto.instructorId });
-        if (!student || !instructor) {
-            throw new common_1.NotFoundException('Student or Instructor not found');
+        const queryRunner = this.dataSource.createQueryRunner();
+        await queryRunner.connect();
+        await queryRunner.startTransaction();
+        try {
+            const student = await queryRunner.manager.findOne(student_entity_1.Student, {
+                where: { studentId: createStudentInstructorDto.studentId },
+            });
+            const instructor = await queryRunner.manager.findOne(instructor_entity_1.Instructor, {
+                where: { instructorId: createStudentInstructorDto.instructorId },
+            });
+            if (!student || !instructor) {
+                throw new common_1.NotFoundException('Student or Instructor not found');
+            }
+            const newStudentInstructor = this.studentInstructorRepository.create({
+                student,
+                instructor,
+            });
+            const savedStudentInstructor = await queryRunner.manager.save(student_instructor_entity_1.StudentInstructor, newStudentInstructor);
+            await queryRunner.commitTransaction();
+            return savedStudentInstructor;
         }
-        const newStudentInstructor = this.studentInstructorRepository.create({
-            student,
-            instructor,
-        });
-        return this.studentInstructorRepository.save(newStudentInstructor);
+        catch (err) {
+            await queryRunner.rollbackTransaction();
+            throw err;
+        }
+        finally {
+            await queryRunner.release();
+        }
     }
     async findAll() {
         return this.studentInstructorRepository.find({
@@ -53,38 +72,73 @@ let StudentInstructorService = class StudentInstructorService {
         return studentInstructor;
     }
     async update(id, updateStudentInstructorDto) {
-        const studentInstructor = await this.studentInstructorRepository.findOneBy({ studentInstructorId: id });
-        if (!studentInstructor) {
-            throw new common_1.NotFoundException('StudentInstructor not found');
-        }
-        if (updateStudentInstructorDto.studentId) {
-            const student = await this.studentRepository.findOneBy({ studentId: updateStudentInstructorDto.studentId });
-            if (student) {
-                studentInstructor.student = student;
+        const queryRunner = this.dataSource.createQueryRunner();
+        await queryRunner.connect();
+        await queryRunner.startTransaction();
+        try {
+            const studentInstructor = await queryRunner.manager.findOne(student_instructor_entity_1.StudentInstructor, {
+                where: { studentInstructorId: id },
+                relations: ['student', 'instructor'],
+            });
+            if (!studentInstructor) {
+                throw new common_1.NotFoundException('StudentInstructor not found');
             }
-        }
-        if (updateStudentInstructorDto.instructorId) {
-            const instructor = await this.instructorRepository.findOneBy({ instructorId: updateStudentInstructorDto.instructorId });
-            if (instructor) {
-                studentInstructor.instructor = instructor;
+            if (updateStudentInstructorDto.studentId) {
+                const student = await queryRunner.manager.findOne(student_entity_1.Student, {
+                    where: { studentId: updateStudentInstructorDto.studentId },
+                });
+                if (student) {
+                    studentInstructor.student = student;
+                }
             }
+            if (updateStudentInstructorDto.instructorId) {
+                const instructor = await queryRunner.manager.findOne(instructor_entity_1.Instructor, {
+                    where: { instructorId: updateStudentInstructorDto.instructorId },
+                });
+                if (instructor) {
+                    studentInstructor.instructor = instructor;
+                }
+            }
+            await queryRunner.manager.save(student_instructor_entity_1.StudentInstructor, studentInstructor);
+            await queryRunner.commitTransaction();
         }
-        await this.studentInstructorRepository.save(studentInstructor);
+        catch (err) {
+            await queryRunner.rollbackTransaction();
+            throw err;
+        }
+        finally {
+            await queryRunner.release();
+        }
     }
     async delete(id) {
-        const result = await this.studentInstructorRepository.delete(id);
-        if (result.affected === 0) {
-            throw new common_1.NotFoundException('StudentInstructor not found');
+        const queryRunner = this.dataSource.createQueryRunner();
+        await queryRunner.connect();
+        await queryRunner.startTransaction();
+        try {
+            const result = await queryRunner.manager.delete(student_instructor_entity_1.StudentInstructor, id);
+            if (result.affected === 0) {
+                throw new common_1.NotFoundException('StudentInstructor not found');
+            }
+            await queryRunner.commitTransaction();
+        }
+        catch (err) {
+            await queryRunner.rollbackTransaction();
+            throw err;
+        }
+        finally {
+            await queryRunner.release();
         }
     }
 };
 exports.StudentInstructorService = StudentInstructorService;
 exports.StudentInstructorService = StudentInstructorService = __decorate([
     (0, common_1.Injectable)(),
-    __param(0, (0, typeorm_1.InjectRepository)(student_instructor_entity_1.StudentInstructor)),
-    __param(1, (0, typeorm_1.InjectRepository)(student_entity_1.Student)),
-    __param(2, (0, typeorm_1.InjectRepository)(instructor_entity_1.Instructor)),
-    __metadata("design:paramtypes", [typeorm_2.Repository,
+    __param(0, (0, typeorm_1.InjectDataSource)()),
+    __param(1, (0, typeorm_1.InjectRepository)(student_instructor_entity_1.StudentInstructor)),
+    __param(2, (0, typeorm_1.InjectRepository)(student_entity_1.Student)),
+    __param(3, (0, typeorm_1.InjectRepository)(instructor_entity_1.Instructor)),
+    __metadata("design:paramtypes", [typeorm_2.DataSource,
+        typeorm_2.Repository,
         typeorm_2.Repository,
         typeorm_2.Repository])
 ], StudentInstructorService);

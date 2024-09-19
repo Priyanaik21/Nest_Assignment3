@@ -1,6 +1,6 @@
-import { Injectable } from '@nestjs/common';
-import { InjectRepository } from '@nestjs/typeorm';
-import { Repository } from 'typeorm';
+import { Injectable, NotFoundException } from '@nestjs/common';
+import { InjectDataSource, InjectRepository } from '@nestjs/typeorm';
+import { DataSource, Repository } from 'typeorm';
 import { Student } from './student.entity';
 import { CreateStudentDto, UpdateStudentDto } from './student.dto';
 import { UserInformation } from '../user-information/user-information.entity';
@@ -8,6 +8,8 @@ import { UserInformation } from '../user-information/user-information.entity';
 @Injectable()
 export class StudentService {
   constructor(
+    @InjectDataSource()
+    private readonly dataSource: DataSource,
     @InjectRepository(Student)
     private readonly studentRepository: Repository<Student>,
     @InjectRepository(UserInformation)
@@ -15,14 +17,30 @@ export class StudentService {
   ) {}
 
   async create(createStudentDto: CreateStudentDto): Promise<Student> {
-    const userInformation = await this.userInformationRepository.findOneBy({ userId: createStudentDto.userInformationId });
+    const queryRunner = this.dataSource.createQueryRunner();
+    await queryRunner.connect();
+    await queryRunner.startTransaction();
 
-    if (!userInformation) {
-      throw new Error('UserInformation not found');
+    try {
+      const userInformation = await queryRunner.manager.findOne(UserInformation, {
+        where: { userId: createStudentDto.userInformationId },
+      });
+
+      if (!userInformation) {
+        throw new NotFoundException('UserInformation not found');
+      }
+
+      const newStudent = this.studentRepository.create({ userInformation });
+      const savedStudent = await queryRunner.manager.save(Student, newStudent);
+
+      await queryRunner.commitTransaction();
+      return savedStudent;
+    } catch (err) {
+      await queryRunner.rollbackTransaction();
+      throw err;
+    } finally {
+      await queryRunner.release();
     }
-
-    const newStudent = this.studentRepository.create({ userInformation });
-    return this.studentRepository.save(newStudent);
   }
 
   async findAll(): Promise<Student[]> {
@@ -32,31 +50,75 @@ export class StudentService {
   }
 
   async findOne(id: number): Promise<Student> {
-    return this.studentRepository.findOne({
+    const student = await this.studentRepository.findOne({
       where: { studentId: id },
       relations: ['userInformation'],
     });
+
+    if (!student) {
+      throw new NotFoundException('Student not found');
+    }
+
+    return student;
   }
 
   async update(id: number, updateStudentDto: UpdateStudentDto): Promise<void> {
-    const student = await this.studentRepository.findOneBy({ studentId: id });
+    const queryRunner = this.dataSource.createQueryRunner();
+    await queryRunner.connect();
+    await queryRunner.startTransaction();
 
-    if (!student) {
-      throw new Error('Student not found');
-    }
+    try {
+      const student = await queryRunner.manager.findOne(Student, {
+        where: { studentId: id },
+      });
 
-    if (updateStudentDto.userInformationId) {
-      const userInformation = await this.userInformationRepository.findOneBy({ userId: updateStudentDto.userInformationId });
-      if (!userInformation) {
-        throw new Error('UserInformation not found');
+      if (!student) {
+        throw new NotFoundException('Student not found');
       }
-      student.userInformation = userInformation;
-    }
 
-    await this.studentRepository.save(student);
+      if (updateStudentDto.userInformationId) {
+        const userInformation = await queryRunner.manager.findOne(UserInformation, {
+          where: { userId: updateStudentDto.userInformationId },
+        });
+
+        if (!userInformation) {
+          throw new NotFoundException('UserInformation not found');
+        }
+
+        student.userInformation = userInformation;
+      }
+
+      await queryRunner.manager.save(Student, student);
+      await queryRunner.commitTransaction();
+    } catch (err) {
+      await queryRunner.rollbackTransaction();
+      throw err;
+    } finally {
+      await queryRunner.release();
+    }
   }
 
   async delete(id: number): Promise<void> {
-    await this.studentRepository.delete(id);
+    const queryRunner = this.dataSource.createQueryRunner();
+    await queryRunner.connect();
+    await queryRunner.startTransaction();
+
+    try {
+      const student = await queryRunner.manager.findOne(Student, {
+        where: { studentId: id },
+      });
+
+      if (!student) {
+        throw new NotFoundException('Student not found');
+      }
+
+      await queryRunner.manager.delete(Student, id);
+      await queryRunner.commitTransaction();
+    } catch (err) {
+      await queryRunner.rollbackTransaction();
+      throw err;
+    } finally {
+      await queryRunner.release();
+    }
   }
 }

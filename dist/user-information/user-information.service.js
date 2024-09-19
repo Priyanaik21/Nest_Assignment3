@@ -18,20 +18,34 @@ const typeorm_1 = require("@nestjs/typeorm");
 const typeorm_2 = require("typeorm");
 const user_information_entity_1 = require("./user-information.entity");
 let UserInformationService = class UserInformationService {
-    constructor(userInformationRepository) {
-        this.userInformationRepository = userInformationRepository;
+    constructor(dataSource) {
+        this.dataSource = dataSource;
     }
     async create(createUserInformationDto) {
-        const newUserInformation = this.userInformationRepository.create(createUserInformationDto);
-        return this.userInformationRepository.save(newUserInformation);
+        const queryRunner = this.dataSource.createQueryRunner();
+        await queryRunner.connect();
+        await queryRunner.startTransaction();
+        try {
+            const newUserInformation = this.dataSource.getRepository(user_information_entity_1.UserInformation).create(createUserInformationDto);
+            const savedUserInformation = await queryRunner.manager.save(newUserInformation);
+            await queryRunner.commitTransaction();
+            return savedUserInformation;
+        }
+        catch (err) {
+            await queryRunner.rollbackTransaction();
+            throw err;
+        }
+        finally {
+            await queryRunner.release();
+        }
     }
     async findAll() {
-        return this.userInformationRepository.find({
+        return this.dataSource.getRepository(user_information_entity_1.UserInformation).find({
             relations: ['students', 'instructors'],
         });
     }
     async findOne(id) {
-        const userInformation = await this.userInformationRepository.findOne({
+        const userInformation = await this.dataSource.getRepository(user_information_entity_1.UserInformation).findOne({
             where: { userId: id },
             relations: ['students', 'instructors'],
         });
@@ -41,25 +55,55 @@ let UserInformationService = class UserInformationService {
         return userInformation;
     }
     async update(id, updateUserInformationDto) {
-        const userInformation = await this.userInformationRepository.findOne({ where: { userId: id } });
-        if (!userInformation) {
-            throw new common_1.NotFoundException('UserInformation not found');
+        const queryRunner = this.dataSource.createQueryRunner();
+        await queryRunner.connect();
+        await queryRunner.startTransaction();
+        try {
+            const userInformation = await queryRunner.manager.findOne(user_information_entity_1.UserInformation, {
+                where: { userId: id },
+            });
+            if (!userInformation) {
+                throw new common_1.NotFoundException('UserInformation not found');
+            }
+            Object.assign(userInformation, updateUserInformationDto);
+            await queryRunner.manager.save(userInformation);
+            await queryRunner.commitTransaction();
         }
-        Object.assign(userInformation, updateUserInformationDto);
-        await this.userInformationRepository.save(userInformation);
+        catch (err) {
+            await queryRunner.rollbackTransaction();
+            throw err;
+        }
+        finally {
+            await queryRunner.release();
+        }
     }
     async delete(id) {
-        const userInformation = await this.userInformationRepository.findOne({ where: { userId: id } });
-        if (!userInformation) {
-            throw new common_1.NotFoundException('UserInformation not found');
+        const queryRunner = this.dataSource.createQueryRunner();
+        await queryRunner.connect();
+        await queryRunner.startTransaction();
+        try {
+            const userInformation = await queryRunner.manager.findOne(user_information_entity_1.UserInformation, {
+                where: { userId: id },
+            });
+            if (!userInformation) {
+                throw new common_1.NotFoundException('UserInformation not found');
+            }
+            await queryRunner.manager.delete(user_information_entity_1.UserInformation, id);
+            await queryRunner.commitTransaction();
         }
-        await this.userInformationRepository.delete(id);
+        catch (err) {
+            await queryRunner.rollbackTransaction();
+            throw err;
+        }
+        finally {
+            await queryRunner.release();
+        }
     }
 };
 exports.UserInformationService = UserInformationService;
 exports.UserInformationService = UserInformationService = __decorate([
     (0, common_1.Injectable)(),
-    __param(0, (0, typeorm_1.InjectRepository)(user_information_entity_1.UserInformation)),
-    __metadata("design:paramtypes", [typeorm_2.Repository])
+    __param(0, (0, typeorm_1.InjectDataSource)()),
+    __metadata("design:paramtypes", [typeorm_2.DataSource])
 ], UserInformationService);
 //# sourceMappingURL=user-information.service.js.map

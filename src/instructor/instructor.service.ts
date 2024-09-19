@@ -1,6 +1,6 @@
-import { Injectable } from '@nestjs/common';
-import { InjectRepository } from '@nestjs/typeorm';
-import { Repository } from 'typeorm';
+import { Injectable, NotFoundException } from '@nestjs/common';
+import { InjectDataSource, InjectRepository } from '@nestjs/typeorm';
+import { DataSource, Repository } from 'typeorm';
 import { Instructor } from './instructor.entity';
 import { CreateInstructorDto, UpdateInstructorDto } from './instructor.dto';
 import { UserInformation } from '../user-information/user-information.entity';
@@ -8,6 +8,8 @@ import { UserInformation } from '../user-information/user-information.entity';
 @Injectable()
 export class InstructorService {
   constructor(
+    @InjectDataSource()
+    private readonly dataSource: DataSource,
     @InjectRepository(Instructor)
     private readonly instructorRepository: Repository<Instructor>,
     @InjectRepository(UserInformation)
@@ -15,19 +17,32 @@ export class InstructorService {
   ) {}
 
   async create(createInstructorDto: CreateInstructorDto): Promise<Instructor> {
-    const userInformation = await this.userInformationRepository.findOneBy({
-      userId: createInstructorDto.userInformationId,
-    });
+    const queryRunner = this.dataSource.createQueryRunner();
+    await queryRunner.connect();
+    await queryRunner.startTransaction();
 
-    if (!userInformation) {
-      throw new Error('UserInformation not found');
+    try {
+      const userInformation = await queryRunner.manager.findOne(UserInformation, {
+        where: { userId: createInstructorDto.userInformationId },
+      });
+
+      if (!userInformation) {
+        throw new NotFoundException('UserInformation not found');
+      }
+
+      const newInstructor = this.instructorRepository.create({
+        userInformation,
+      });
+
+      const savedInstructor = await queryRunner.manager.save(Instructor, newInstructor);
+      await queryRunner.commitTransaction();
+      return savedInstructor;
+    } catch (err) {
+      await queryRunner.rollbackTransaction();
+      throw err;
+    } finally {
+      await queryRunner.release();
     }
-
-    const newInstructor = this.instructorRepository.create({
-      userInformation,
-    });
-
-    return this.instructorRepository.save(newInstructor);
   }
 
   async findAll(): Promise<Instructor[]> {
@@ -37,44 +52,76 @@ export class InstructorService {
   }
 
   async findOne(id: number): Promise<Instructor> {
-    return this.instructorRepository.findOne({
-      where: { instructorId: id },
-      relations: ['userInformation'],
-    });
-  }
-
-  async update(id: number, updateInstructorDto: UpdateInstructorDto): Promise<void> {
     const instructor = await this.instructorRepository.findOne({
       where: { instructorId: id },
       relations: ['userInformation'],
     });
 
     if (!instructor) {
-      throw new Error('Instructor not found');
+      throw new NotFoundException('Instructor not found');
     }
 
-    if (updateInstructorDto.userInformationId) {
-      const userInformation = await this.userInformationRepository.findOneBy({
-        userId: updateInstructorDto.userInformationId,
+    return instructor;
+  }
+
+  async update(id: number, updateInstructorDto: UpdateInstructorDto): Promise<void> {
+    const queryRunner = this.dataSource.createQueryRunner();
+    await queryRunner.connect();
+    await queryRunner.startTransaction();
+
+    try {
+      const instructor = await queryRunner.manager.findOne(Instructor, {
+        where: { instructorId: id },
+        relations: ['userInformation'],
       });
 
-      if (!userInformation) {
-        throw new Error('UserInformation not found');
+      if (!instructor) {
+        throw new NotFoundException('Instructor not found');
       }
 
-      instructor.userInformation = userInformation;
-    }
+      if (updateInstructorDto.userInformationId) {
+        const userInformation = await queryRunner.manager.findOne(UserInformation, {
+          where: { userId: updateInstructorDto.userInformationId },
+        });
 
-    await this.instructorRepository.save(instructor);
+        if (!userInformation) {
+          throw new NotFoundException('UserInformation not found');
+        }
+
+        instructor.userInformation = userInformation;
+      }
+
+      await queryRunner.manager.save(Instructor, instructor);
+      await queryRunner.commitTransaction();
+    } catch (err) {
+      await queryRunner.rollbackTransaction();
+      throw err;
+    } finally {
+      await queryRunner.release();
+    }
   }
 
   async delete(id: number): Promise<void> {
-    const instructor = await this.instructorRepository.findOne({ where: { instructorId: id } });
+    const queryRunner = this.dataSource.createQueryRunner();
+    await queryRunner.connect();
+    await queryRunner.startTransaction();
 
-    if (!instructor) {
-      throw new Error('Instructor not found');
+    try {
+      const instructor = await queryRunner.manager.findOne(Instructor, {
+        where: { instructorId: id },
+      });
+
+      if (!instructor) {
+        throw new NotFoundException('Instructor not found');
+      }
+
+      await queryRunner.manager.delete(Instructor, id);
+      await queryRunner.commitTransaction();
+    } catch (err) {
+      await queryRunner.rollbackTransaction();
+      throw err;
+    } finally {
+      await queryRunner.release();
     }
-
-    await this.instructorRepository.delete(id);
   }
 }

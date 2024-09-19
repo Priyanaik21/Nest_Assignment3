@@ -19,21 +19,36 @@ const typeorm_2 = require("typeorm");
 const instructor_entity_1 = require("./instructor.entity");
 const user_information_entity_1 = require("../user-information/user-information.entity");
 let InstructorService = class InstructorService {
-    constructor(instructorRepository, userInformationRepository) {
+    constructor(dataSource, instructorRepository, userInformationRepository) {
+        this.dataSource = dataSource;
         this.instructorRepository = instructorRepository;
         this.userInformationRepository = userInformationRepository;
     }
     async create(createInstructorDto) {
-        const userInformation = await this.userInformationRepository.findOneBy({
-            userId: createInstructorDto.userInformationId,
-        });
-        if (!userInformation) {
-            throw new Error('UserInformation not found');
+        const queryRunner = this.dataSource.createQueryRunner();
+        await queryRunner.connect();
+        await queryRunner.startTransaction();
+        try {
+            const userInformation = await queryRunner.manager.findOne(user_information_entity_1.UserInformation, {
+                where: { userId: createInstructorDto.userInformationId },
+            });
+            if (!userInformation) {
+                throw new common_1.NotFoundException('UserInformation not found');
+            }
+            const newInstructor = this.instructorRepository.create({
+                userInformation,
+            });
+            const savedInstructor = await queryRunner.manager.save(instructor_entity_1.Instructor, newInstructor);
+            await queryRunner.commitTransaction();
+            return savedInstructor;
         }
-        const newInstructor = this.instructorRepository.create({
-            userInformation,
-        });
-        return this.instructorRepository.save(newInstructor);
+        catch (err) {
+            await queryRunner.rollbackTransaction();
+            throw err;
+        }
+        finally {
+            await queryRunner.release();
+        }
     }
     async findAll() {
         return this.instructorRepository.find({
@@ -41,44 +56,78 @@ let InstructorService = class InstructorService {
         });
     }
     async findOne(id) {
-        return this.instructorRepository.findOne({
-            where: { instructorId: id },
-            relations: ['userInformation'],
-        });
-    }
-    async update(id, updateInstructorDto) {
         const instructor = await this.instructorRepository.findOne({
             where: { instructorId: id },
             relations: ['userInformation'],
         });
         if (!instructor) {
-            throw new Error('Instructor not found');
+            throw new common_1.NotFoundException('Instructor not found');
         }
-        if (updateInstructorDto.userInformationId) {
-            const userInformation = await this.userInformationRepository.findOneBy({
-                userId: updateInstructorDto.userInformationId,
+        return instructor;
+    }
+    async update(id, updateInstructorDto) {
+        const queryRunner = this.dataSource.createQueryRunner();
+        await queryRunner.connect();
+        await queryRunner.startTransaction();
+        try {
+            const instructor = await queryRunner.manager.findOne(instructor_entity_1.Instructor, {
+                where: { instructorId: id },
+                relations: ['userInformation'],
             });
-            if (!userInformation) {
-                throw new Error('UserInformation not found');
+            if (!instructor) {
+                throw new common_1.NotFoundException('Instructor not found');
             }
-            instructor.userInformation = userInformation;
+            if (updateInstructorDto.userInformationId) {
+                const userInformation = await queryRunner.manager.findOne(user_information_entity_1.UserInformation, {
+                    where: { userId: updateInstructorDto.userInformationId },
+                });
+                if (!userInformation) {
+                    throw new common_1.NotFoundException('UserInformation not found');
+                }
+                instructor.userInformation = userInformation;
+            }
+            await queryRunner.manager.save(instructor_entity_1.Instructor, instructor);
+            await queryRunner.commitTransaction();
         }
-        await this.instructorRepository.save(instructor);
+        catch (err) {
+            await queryRunner.rollbackTransaction();
+            throw err;
+        }
+        finally {
+            await queryRunner.release();
+        }
     }
     async delete(id) {
-        const instructor = await this.instructorRepository.findOne({ where: { instructorId: id } });
-        if (!instructor) {
-            throw new Error('Instructor not found');
+        const queryRunner = this.dataSource.createQueryRunner();
+        await queryRunner.connect();
+        await queryRunner.startTransaction();
+        try {
+            const instructor = await queryRunner.manager.findOne(instructor_entity_1.Instructor, {
+                where: { instructorId: id },
+            });
+            if (!instructor) {
+                throw new common_1.NotFoundException('Instructor not found');
+            }
+            await queryRunner.manager.delete(instructor_entity_1.Instructor, id);
+            await queryRunner.commitTransaction();
         }
-        await this.instructorRepository.delete(id);
+        catch (err) {
+            await queryRunner.rollbackTransaction();
+            throw err;
+        }
+        finally {
+            await queryRunner.release();
+        }
     }
 };
 exports.InstructorService = InstructorService;
 exports.InstructorService = InstructorService = __decorate([
     (0, common_1.Injectable)(),
-    __param(0, (0, typeorm_1.InjectRepository)(instructor_entity_1.Instructor)),
-    __param(1, (0, typeorm_1.InjectRepository)(user_information_entity_1.UserInformation)),
-    __metadata("design:paramtypes", [typeorm_2.Repository,
+    __param(0, (0, typeorm_1.InjectDataSource)()),
+    __param(1, (0, typeorm_1.InjectRepository)(instructor_entity_1.Instructor)),
+    __param(2, (0, typeorm_1.InjectRepository)(user_information_entity_1.UserInformation)),
+    __metadata("design:paramtypes", [typeorm_2.DataSource,
+        typeorm_2.Repository,
         typeorm_2.Repository])
 ], InstructorService);
 //# sourceMappingURL=instructor.service.js.map
