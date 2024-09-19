@@ -15,13 +15,13 @@ Object.defineProperty(exports, "__esModule", { value: true });
 exports.StudentInstructorController = void 0;
 const common_1 = require("@nestjs/common");
 const student_instructor_service_1 = require("./student-instructor.service");
-const student_instructor_entity_1 = require("./student-instructor.entity");
+const student_instructor_dto_1 = require("./student-instructor.dto");
 let StudentInstructorController = class StudentInstructorController {
     constructor(studentInstructorService) {
         this.studentInstructorService = studentInstructorService;
     }
-    async create(studentInstructorData) {
-        return this.studentInstructorService.create(studentInstructorData);
+    async create(createStudentInstructorDto) {
+        return this.studentInstructorService.create(createStudentInstructorDto);
     }
     async findAll() {
         return this.studentInstructorService.findAll();
@@ -29,8 +29,8 @@ let StudentInstructorController = class StudentInstructorController {
     async findOne(id) {
         return this.studentInstructorService.findOne(id);
     }
-    async update(id, studentInstructorData) {
-        return this.studentInstructorService.update(id, studentInstructorData);
+    async update(id, updateStudentInstructorDto) {
+        return this.studentInstructorService.update(id, updateStudentInstructorDto);
     }
     async delete(id) {
         return this.studentInstructorService.delete(id);
@@ -41,7 +41,7 @@ __decorate([
     (0, common_1.Post)(),
     __param(0, (0, common_1.Body)()),
     __metadata("design:type", Function),
-    __metadata("design:paramtypes", [student_instructor_entity_1.StudentInstructor]),
+    __metadata("design:paramtypes", [student_instructor_dto_1.CreateStudentInstructorDto]),
     __metadata("design:returntype", Promise)
 ], StudentInstructorController.prototype, "create", null);
 __decorate([
@@ -62,7 +62,7 @@ __decorate([
     __param(0, (0, common_1.Param)('id')),
     __param(1, (0, common_1.Body)()),
     __metadata("design:type", Function),
-    __metadata("design:paramtypes", [Number, Object]),
+    __metadata("design:paramtypes", [Number, student_instructor_dto_1.UpdateStudentInstructorDto]),
     __metadata("design:returntype", Promise)
 ], StudentInstructorController.prototype, "update", null);
 __decorate([

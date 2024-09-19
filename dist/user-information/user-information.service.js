@@ -21,19 +21,38 @@ let UserInformationService = class UserInformationService {
     constructor(userInformationRepository) {
         this.userInformationRepository = userInformationRepository;
     }
-    async create(userInformationData) {
-        return this.userInformationRepository.save(userInformationData);
+    async create(createUserInformationDto) {
+        const newUserInformation = this.userInformationRepository.create(createUserInformationDto);
+        return this.userInformationRepository.save(newUserInformation);
     }
     async findAll() {
-        return this.userInformationRepository.find();
+        return this.userInformationRepository.find({
+            relations: ['students', 'instructors'],
+        });
     }
     async findOne(id) {
-        return this.userInformationRepository.findOneBy({ user_id: id });
+        const userInformation = await this.userInformationRepository.findOne({
+            where: { userId: id },
+            relations: ['students', 'instructors'],
+        });
+        if (!userInformation) {
+            throw new common_1.NotFoundException('UserInformation not found');
+        }
+        return userInformation;
     }
-    async update(id, userInformationData) {
-        await this.userInformationRepository.update(id, userInformationData);
+    async update(id, updateUserInformationDto) {
+        const userInformation = await this.userInformationRepository.findOne({ where: { userId: id } });
+        if (!userInformation) {
+            throw new common_1.NotFoundException('UserInformation not found');
+        }
+        Object.assign(userInformation, updateUserInformationDto);
+        await this.userInformationRepository.save(userInformation);
     }
     async delete(id) {
+        const userInformation = await this.userInformationRepository.findOne({ where: { userId: id } });
+        if (!userInformation) {
+            throw new common_1.NotFoundException('UserInformation not found');
+        }
         await this.userInformationRepository.delete(id);
     }
 };

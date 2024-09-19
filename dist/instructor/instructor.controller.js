@@ -15,13 +15,13 @@ Object.defineProperty(exports, "__esModule", { value: true });
 exports.InstructorController = void 0;
 const common_1 = require("@nestjs/common");
 const instructor_service_1 = require("./instructor.service");
-const instructor_entity_1 = require("./instructor.entity");
+const instructor_dto_1 = require("./instructor.dto");
 let InstructorController = class InstructorController {
     constructor(instructorService) {
         this.instructorService = instructorService;
     }
-    async create(instructorData) {
-        return this.instructorService.create(instructorData);
+    async create(createInstructorDto) {
+        return this.instructorService.create(createInstructorDto);
     }
     async findAll() {
         return this.instructorService.findAll();
@@ -29,8 +29,8 @@ let InstructorController = class InstructorController {
     async findOne(id) {
         return this.instructorService.findOne(id);
     }
-    async update(id, instructorData) {
-        return this.instructorService.update(id, instructorData);
+    async update(id, updateInstructorDto) {
+        return this.instructorService.update(id, updateInstructorDto);
     }
     async delete(id) {
         return this.instructorService.delete(id);
@@ -41,7 +41,7 @@ __decorate([
     (0, common_1.Post)(),
     __param(0, (0, common_1.Body)()),
     __metadata("design:type", Function),
-    __metadata("design:paramtypes", [instructor_entity_1.Instructor]),
+    __metadata("design:paramtypes", [instructor_dto_1.CreateInstructorDto]),
     __metadata("design:returntype", Promise)
 ], InstructorController.prototype, "create", null);
 __decorate([
@@ -62,7 +62,7 @@ __decorate([
     __param(0, (0, common_1.Param)('id')),
     __param(1, (0, common_1.Body)()),
     __metadata("design:type", Function),
-    __metadata("design:paramtypes", [Number, Object]),
+    __metadata("design:paramtypes", [Number, instructor_dto_1.UpdateInstructorDto]),
     __metadata("design:returntype", Promise)
 ], InstructorController.prototype, "update", null);
 __decorate([
@@ -73,7 +73,7 @@ __decorate([
     __metadata("design:returntype", Promise)
 ], InstructorController.prototype, "delete", null);
 exports.InstructorController = InstructorController = __decorate([
-    (0, common_1.Controller)('instructor'),
+    (0, common_1.Controller)('instructors'),
     __metadata("design:paramtypes", [instructor_service_1.InstructorService])
 ], InstructorController);
 //# sourceMappingURL=instructor.controller.js.map

@@ -1,11 +1,11 @@
 import { InstructorService } from './instructor.service';
-import { Instructor } from './instructor.entity';
+import { CreateInstructorDto, UpdateInstructorDto } from './instructor.dto';
 export declare class InstructorController {
     private readonly instructorService;
     constructor(instructorService: InstructorService);
-    create(instructorData: Instructor): Promise<Instructor>;
-    findAll(): Promise<Instructor[]>;
-    findOne(id: number): Promise<Instructor>;
-    update(id: number, instructorData: Partial<Instructor>): Promise<void>;
+    create(createInstructorDto: CreateInstructorDto): Promise<import("./instructor.entity").Instructor>;
+    findAll(): Promise<import("./instructor.entity").Instructor[]>;
+    findOne(id: number): Promise<import("./instructor.entity").Instructor>;
+    update(id: number, updateInstructorDto: UpdateInstructorDto): Promise<void>;
     delete(id: number): Promise<void>;
 }

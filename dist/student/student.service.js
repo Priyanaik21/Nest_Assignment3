@@ -17,21 +17,44 @@ const common_1 = require("@nestjs/common");
 const typeorm_1 = require("@nestjs/typeorm");
 const typeorm_2 = require("typeorm");
 const student_entity_1 = require("./student.entity");
+const user_information_entity_1 = require("../user-information/user-information.entity");
 let StudentService = class StudentService {
-    constructor(studentRepository) {
+    constructor(studentRepository, userInformationRepository) {
         this.studentRepository = studentRepository;
+        this.userInformationRepository = userInformationRepository;
     }
-    async create(studentData) {
-        return this.studentRepository.save(studentData);
+    async create(createStudentDto) {
+        const userInformation = await this.userInformationRepository.findOneBy({ userId: createStudentDto.userInformationId });
+        if (!userInformation) {
+            throw new Error('UserInformation not found');
+        }
+        const newStudent = this.studentRepository.create({ userInformation });
+        return this.studentRepository.save(newStudent);
     }
     async findAll() {
-        return this.studentRepository.find();
+        return this.studentRepository.find({
+            relations: ['userInformation'],
+        });
     }
     async findOne(id) {
-        return this.studentRepository.findOneBy({ student_id: id });
+        return this.studentRepository.findOne({
+            where: { studentId: id },
+            relations: ['userInformation'],
+        });
     }
-    async update(id, studentData) {
-        await this.studentRepository.update(id, studentData);
+    async update(id, updateStudentDto) {
+        const student = await this.studentRepository.findOneBy({ studentId: id });
+        if (!student) {
+            throw new Error('Student not found');
+        }
+        if (updateStudentDto.userInformationId) {
+            const userInformation = await this.userInformationRepository.findOneBy({ userId: updateStudentDto.userInformationId });
+            if (!userInformation) {
+                throw new Error('UserInformation not found');
+            }
+            student.userInformation = userInformation;
+        }
+        await this.studentRepository.save(student);
     }
     async delete(id) {
         await this.studentRepository.delete(id);
@@ -41,6 +64,8 @@ exports.StudentService = StudentService;
 exports.StudentService = StudentService = __decorate([
     (0, common_1.Injectable)(),
     __param(0, (0, typeorm_1.InjectRepository)(student_entity_1.Student)),
-    __metadata("design:paramtypes", [typeorm_2.Repository])
+    __param(1, (0, typeorm_1.InjectRepository)(user_information_entity_1.UserInformation)),
+    __metadata("design:paramtypes", [typeorm_2.Repository,
+        typeorm_2.Repository])
 ], StudentService);
 //# sourceMappingURL=student.service.js.map

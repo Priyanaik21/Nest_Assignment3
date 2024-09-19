@@ -18,9 +18,9 @@ exports.Student = Student;
 __decorate([
     (0, typeorm_1.PrimaryGeneratedColumn)(),
     __metadata("design:type", Number)
-], Student.prototype, "student_id", void 0);
+], Student.prototype, "studentId", void 0);
 __decorate([
-    (0, typeorm_1.ManyToOne)(() => user_information_entity_1.UserInformation, userInformation => userInformation.user_id, { onDelete: 'CASCADE' }),
+    (0, typeorm_1.ManyToOne)(() => user_information_entity_1.UserInformation, userInformation => userInformation.students, { onDelete: 'CASCADE' }),
     __metadata("design:type", user_information_entity_1.UserInformation)
 ], Student.prototype, "userInformation", void 0);
 exports.Student = Student = __decorate([

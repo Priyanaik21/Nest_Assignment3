@@ -1,33 +1,33 @@
 import { Controller, Get, Post, Body, Param, Put, Delete } from '@nestjs/common';
 import { InstructorService } from './instructor.service';
-import { Instructor } from './instructor.entity';
+import { CreateInstructorDto, UpdateInstructorDto } from './instructor.dto';
 
-@Controller('instructor')
+@Controller('instructors')
 export class InstructorController {
   constructor(private readonly instructorService: InstructorService) {}
 
   @Post()
-  async create(@Body() instructorData: Instructor): Promise<Instructor> {
-    return this.instructorService.create(instructorData);
+  async create(@Body() createInstructorDto: CreateInstructorDto) {
+    return this.instructorService.create(createInstructorDto);
   }
 
   @Get()
-  async findAll(): Promise<Instructor[]> {
+  async findAll() {
     return this.instructorService.findAll();
   }
 
   @Get(':id')
-  async findOne(@Param('id') id: number): Promise<Instructor> {
+  async findOne(@Param('id') id: number) {
     return this.instructorService.findOne(id);
   }
 
   @Put(':id')
-  async update(@Param('id') id: number, @Body() instructorData: Partial<Instructor>): Promise<void> {
-    return this.instructorService.update(id, instructorData);
+  async update(@Param('id') id: number, @Body() updateInstructorDto: UpdateInstructorDto) {
+    return this.instructorService.update(id, updateInstructorDto);
   }
 
   @Delete(':id')
-  async delete(@Param('id') id: number): Promise<void> {
+  async delete(@Param('id') id: number) {
     return this.instructorService.delete(id);
   }
 }

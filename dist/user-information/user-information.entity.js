@@ -11,21 +11,23 @@ var __metadata = (this && this.__metadata) || function (k, v) {
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.UserInformation = void 0;
 const typeorm_1 = require("typeorm");
+const student_entity_1 = require("../student/student.entity");
+const instructor_entity_1 = require("../instructor/instructor.entity");
 let UserInformation = class UserInformation {
 };
 exports.UserInformation = UserInformation;
 __decorate([
     (0, typeorm_1.PrimaryGeneratedColumn)(),
     __metadata("design:type", Number)
-], UserInformation.prototype, "user_id", void 0);
+], UserInformation.prototype, "userId", void 0);
 __decorate([
     (0, typeorm_1.Column)({ length: 50 }),
     __metadata("design:type", String)
-], UserInformation.prototype, "F_name", void 0);
+], UserInformation.prototype, "firstName", void 0);
 __decorate([
     (0, typeorm_1.Column)({ length: 50 }),
     __metadata("design:type", String)
-], UserInformation.prototype, "L_name", void 0);
+], UserInformation.prototype, "lastName", void 0);
 __decorate([
     (0, typeorm_1.Column)('int'),
     __metadata("design:type", Number)
@@ -38,6 +40,14 @@ __decorate([
     (0, typeorm_1.Column)({ length: 100 }),
     __metadata("design:type", String)
 ], UserInformation.prototype, "address", void 0);
+__decorate([
+    (0, typeorm_1.OneToMany)(() => student_entity_1.Student, student => student.userInformation),
+    __metadata("design:type", Array)
+], UserInformation.prototype, "students", void 0);
+__decorate([
+    (0, typeorm_1.OneToMany)(() => instructor_entity_1.Instructor, instructor => instructor.userInformation),
+    __metadata("design:type", Array)
+], UserInformation.prototype, "instructors", void 0);
 exports.UserInformation = UserInformation = __decorate([
     (0, typeorm_1.Entity)()
 ], UserInformation);

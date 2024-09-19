@@ -19,13 +19,13 @@ exports.StudentInstructor = StudentInstructor;
 __decorate([
     (0, typeorm_1.PrimaryGeneratedColumn)(),
     __metadata("design:type", Number)
-], StudentInstructor.prototype, "student_instructor_id", void 0);
+], StudentInstructor.prototype, "studentInstructorId", void 0);
 __decorate([
-    (0, typeorm_1.ManyToOne)(() => student_entity_1.Student, student => student.student_id, { onDelete: 'CASCADE' }),
+    (0, typeorm_1.ManyToOne)(() => student_entity_1.Student, student => student.studentId, { onDelete: 'CASCADE' }),
     __metadata("design:type", student_entity_1.Student)
 ], StudentInstructor.prototype, "student", void 0);
 __decorate([
-    (0, typeorm_1.ManyToOne)(() => instructor_entity_1.Instructor, instructor => instructor.instructor_id, { onDelete: 'CASCADE' }),
+    (0, typeorm_1.ManyToOne)(() => instructor_entity_1.Instructor, instructor => instructor.instructorId, { onDelete: 'CASCADE' }),
     __metadata("design:type", instructor_entity_1.Instructor)
 ], StudentInstructor.prototype, "instructor", void 0);
 exports.StudentInstructor = StudentInstructor = __decorate([

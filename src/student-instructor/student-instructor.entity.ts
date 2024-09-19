@@ -5,11 +5,11 @@ import { Instructor } from '../instructor/instructor.entity';
 @Entity()
 export class StudentInstructor {
   @PrimaryGeneratedColumn()
-  student_instructor_id: number;
+  studentInstructorId: number;
 
-  @ManyToOne(() => Student, student => student.student_id, { onDelete: 'CASCADE' })
+  @ManyToOne(() => Student, student => student.studentId, { onDelete: 'CASCADE' })
   student: Student;
 
-  @ManyToOne(() => Instructor, instructor => instructor.instructor_id, { onDelete: 'CASCADE' })
+  @ManyToOne(() => Instructor, instructor => instructor.instructorId, { onDelete: 'CASCADE' })
   instructor: Instructor;
 }

@@ -1,11 +1,11 @@
-import { Entity, PrimaryGeneratedColumn, Column, ManyToOne } from 'typeorm';
+import { Entity, PrimaryGeneratedColumn, ManyToOne } from 'typeorm';
 import { UserInformation } from '../user-information/user-information.entity';
 
 @Entity()
 export class Student {
   @PrimaryGeneratedColumn()
-  student_id: number;
+  studentId: number; 
 
-  @ManyToOne(() => UserInformation, userInformation => userInformation.user_id, { onDelete: 'CASCADE' })
+  @ManyToOne(() => UserInformation, userInformation => userInformation.students, { onDelete: 'CASCADE' })
   userInformation: UserInformation;
 }

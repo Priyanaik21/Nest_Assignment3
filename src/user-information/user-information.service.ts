@@ -1,7 +1,8 @@
-import { Injectable } from '@nestjs/common';
+import { Injectable, NotFoundException } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
 import { UserInformation } from './user-information.entity';
+import { CreateUserInformationDto, UpdateUserInformationDto } from './user-information.dto';
 
 @Injectable()
 export class UserInformationService {
@@ -10,23 +11,48 @@ export class UserInformationService {
     private readonly userInformationRepository: Repository<UserInformation>,
   ) {}
 
-  async create(userInformationData: UserInformation): Promise<UserInformation> {
-    return this.userInformationRepository.save(userInformationData);
+  async create(createUserInformationDto: CreateUserInformationDto): Promise<UserInformation> {
+    const newUserInformation = this.userInformationRepository.create(createUserInformationDto);
+    return this.userInformationRepository.save(newUserInformation);
   }
 
   async findAll(): Promise<UserInformation[]> {
-    return this.userInformationRepository.find();
+    return this.userInformationRepository.find({
+      relations: ['students', 'instructors'], 
+    });
   }
 
   async findOne(id: number): Promise<UserInformation> {
-    return this.userInformationRepository.findOneBy({ user_id: id });
+    const userInformation = await this.userInformationRepository.findOne({
+      where: { userId: id },
+      relations: ['students', 'instructors'],
+    });
+
+    if (!userInformation) {
+      throw new NotFoundException('UserInformation not found');
+    }
+
+    return userInformation;
   }
 
-  async update(id: number, userInformationData: Partial<UserInformation>): Promise<void> {
-    await this.userInformationRepository.update(id, userInformationData);
+  async update(id: number, updateUserInformationDto: UpdateUserInformationDto): Promise<void> {
+    const userInformation = await this.userInformationRepository.findOne({ where: { userId: id } });
+
+    if (!userInformation) {
+      throw new NotFoundException('UserInformation not found');
+    }
+
+    Object.assign(userInformation, updateUserInformationDto);
+    await this.userInformationRepository.save(userInformation);
   }
 
   async delete(id: number): Promise<void> {
+    const userInformation = await this.userInformationRepository.findOne({ where: { userId: id } });
+
+    if (!userInformation) {
+      throw new NotFoundException('UserInformation not found');
+    }
+
     await this.userInformationRepository.delete(id);
   }
 }

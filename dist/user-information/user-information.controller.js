@@ -15,14 +15,13 @@ Object.defineProperty(exports, "__esModule", { value: true });
 exports.UserInformationController = void 0;
 const common_1 = require("@nestjs/common");
 const user_information_service_1 = require("./user-information.service");
-const user_information_entity_1 = require("./user-information.entity");
+const user_information_dto_1 = require("./user-information.dto");
 let UserInformationController = class UserInformationController {
     constructor(userInformationService) {
         this.userInformationService = userInformationService;
     }
-    async create(userInformationData) {
-        console.log('Request Body:', userInformationData);
-        return this.userInformationService.create(userInformationData);
+    async create(createUserInformationDto) {
+        return this.userInformationService.create(createUserInformationDto);
     }
     async findAll() {
         return this.userInformationService.findAll();
@@ -30,8 +29,8 @@ let UserInformationController = class UserInformationController {
     async findOne(id) {
         return this.userInformationService.findOne(id);
     }
-    async update(id, userInformationData) {
-        return this.userInformationService.update(id, userInformationData);
+    async update(id, updateUserInformationDto) {
+        return this.userInformationService.update(id, updateUserInformationDto);
     }
     async delete(id) {
         return this.userInformationService.delete(id);
@@ -42,7 +41,7 @@ __decorate([
     (0, common_1.Post)(),
     __param(0, (0, common_1.Body)()),
     __metadata("design:type", Function),
-    __metadata("design:paramtypes", [user_information_entity_1.UserInformation]),
+    __metadata("design:paramtypes", [user_information_dto_1.CreateUserInformationDto]),
     __metadata("design:returntype", Promise)
 ], UserInformationController.prototype, "create", null);
 __decorate([
@@ -63,7 +62,7 @@ __decorate([
     __param(0, (0, common_1.Param)('id')),
     __param(1, (0, common_1.Body)()),
     __metadata("design:type", Function),
-    __metadata("design:paramtypes", [Number, Object]),
+    __metadata("design:paramtypes", [Number, user_information_dto_1.UpdateUserInformationDto]),
     __metadata("design:returntype", Promise)
 ], UserInformationController.prototype, "update", null);
 __decorate([

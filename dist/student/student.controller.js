@@ -15,13 +15,13 @@ Object.defineProperty(exports, "__esModule", { value: true });
 exports.StudentController = void 0;
 const common_1 = require("@nestjs/common");
 const student_service_1 = require("./student.service");
-const student_entity_1 = require("./student.entity");
+const student_dto_1 = require("./student.dto");
 let StudentController = class StudentController {
     constructor(studentService) {
         this.studentService = studentService;
     }
-    async create(studentData) {
-        return this.studentService.create(studentData);
+    async create(createStudentDto) {
+        return this.studentService.create(createStudentDto);
     }
     async findAll() {
         return this.studentService.findAll();
@@ -29,8 +29,8 @@ let StudentController = class StudentController {
     async findOne(id) {
         return this.studentService.findOne(id);
     }
-    async update(id, studentData) {
-        return this.studentService.update(id, studentData);
+    async update(id, updateStudentDto) {
+        return this.studentService.update(id, updateStudentDto);
     }
     async delete(id) {
         return this.studentService.delete(id);
@@ -41,7 +41,7 @@ __decorate([
     (0, common_1.Post)(),
     __param(0, (0, common_1.Body)()),
     __metadata("design:type", Function),
-    __metadata("design:paramtypes", [student_entity_1.Student]),
+    __metadata("design:paramtypes", [student_dto_1.CreateStudentDto]),
     __metadata("design:returntype", Promise)
 ], StudentController.prototype, "create", null);
 __decorate([
@@ -62,7 +62,7 @@ __decorate([
     __param(0, (0, common_1.Param)('id')),
     __param(1, (0, common_1.Body)()),
     __metadata("design:type", Function),
-    __metadata("design:paramtypes", [Number, Object]),
+    __metadata("design:paramtypes", [Number, student_dto_1.UpdateStudentDto]),
     __metadata("design:returntype", Promise)
 ], StudentController.prototype, "update", null);
 __decorate([
@@ -73,7 +73,7 @@ __decorate([
     __metadata("design:returntype", Promise)
 ], StudentController.prototype, "delete", null);
 exports.StudentController = StudentController = __decorate([
-    (0, common_1.Controller)('student'),
+    (0, common_1.Controller)('students'),
     __metadata("design:paramtypes", [student_service_1.StudentService])
 ], StudentController);
 //# sourceMappingURL=student.controller.js.map

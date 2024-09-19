@@ -17,23 +17,59 @@ const common_1 = require("@nestjs/common");
 const typeorm_1 = require("@nestjs/typeorm");
 const typeorm_2 = require("typeorm");
 const instructor_entity_1 = require("./instructor.entity");
+const user_information_entity_1 = require("../user-information/user-information.entity");
 let InstructorService = class InstructorService {
-    constructor(instructorRepository) {
+    constructor(instructorRepository, userInformationRepository) {
         this.instructorRepository = instructorRepository;
+        this.userInformationRepository = userInformationRepository;
     }
-    async create(instructorData) {
-        return this.instructorRepository.save(instructorData);
+    async create(createInstructorDto) {
+        const userInformation = await this.userInformationRepository.findOneBy({
+            userId: createInstructorDto.userInformationId,
+        });
+        if (!userInformation) {
+            throw new Error('UserInformation not found');
+        }
+        const newInstructor = this.instructorRepository.create({
+            userInformation,
+        });
+        return this.instructorRepository.save(newInstructor);
     }
     async findAll() {
-        return this.instructorRepository.find();
+        return this.instructorRepository.find({
+            relations: ['userInformation'],
+        });
     }
     async findOne(id) {
-        return this.instructorRepository.findOneBy({ instructor_id: id });
+        return this.instructorRepository.findOne({
+            where: { instructorId: id },
+            relations: ['userInformation'],
+        });
     }
-    async update(id, instructorData) {
-        await this.instructorRepository.update(id, instructorData);
+    async update(id, updateInstructorDto) {
+        const instructor = await this.instructorRepository.findOne({
+            where: { instructorId: id },
+            relations: ['userInformation'],
+        });
+        if (!instructor) {
+            throw new Error('Instructor not found');
+        }
+        if (updateInstructorDto.userInformationId) {
+            const userInformation = await this.userInformationRepository.findOneBy({
+                userId: updateInstructorDto.userInformationId,
+            });
+            if (!userInformation) {
+                throw new Error('UserInformation not found');
+            }
+            instructor.userInformation = userInformation;
+        }
+        await this.instructorRepository.save(instructor);
     }
     async delete(id) {
+        const instructor = await this.instructorRepository.findOne({ where: { instructorId: id } });
+        if (!instructor) {
+            throw new Error('Instructor not found');
+        }
         await this.instructorRepository.delete(id);
     }
 };
@@ -41,6 +77,8 @@ exports.InstructorService = InstructorService;
 exports.InstructorService = InstructorService = __decorate([
     (0, common_1.Injectable)(),
     __param(0, (0, typeorm_1.InjectRepository)(instructor_entity_1.Instructor)),
-    __metadata("design:paramtypes", [typeorm_2.Repository])
+    __param(1, (0, typeorm_1.InjectRepository)(user_information_entity_1.UserInformation)),
+    __metadata("design:paramtypes", [typeorm_2.Repository,
+        typeorm_2.Repository])
 ], InstructorService);
 //# sourceMappingURL=instructor.service.js.map
