@@ -4,6 +4,7 @@ import { DataSource, Repository } from 'typeorm';
 import { Student } from './student.entity';
 import { CreateStudentDto, UpdateStudentDto } from './student.dto';
 import { UserInformation } from '../user-information/user-information.entity';
+import { applyPaginationSearchSort } from '../utils/paginationSearchSort';
 
 @Injectable()
 export class StudentService {
@@ -43,8 +44,14 @@ export class StudentService {
     }
   }
 
-  async findAll(): Promise<Student[]> {
+  async findAll(queryParams: any): Promise<Student[]> {
+    const searchFields = ['studentId'];
+    const { skip, take, order, where } = applyPaginationSearchSort(queryParams, searchFields);
     return this.studentRepository.find({
+      skip,
+      take, 
+      order,
+      where: where || {},
       relations: ['userInformation'],
     });
   }

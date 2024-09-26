@@ -1,5 +1,6 @@
-import { Controller, Get, Post, Body, Param, Put, Delete } from '@nestjs/common';
+import { Controller, Get, Post, Body, Param, Put, Delete, Query } from '@nestjs/common';
 import { InstructorService } from './instructor.service';
+import { Instructor } from './instructor.entity';
 import { CreateInstructorDto, UpdateInstructorDto } from './instructor.dto';
 
 @Controller('instructors')
@@ -12,8 +13,8 @@ export class InstructorController {
   }
 
   @Get()
-  async findAll() {
-    return this.instructorService.findAll();
+  async findAll(@Query() query: any) {
+    return this.instructorService.findAll(query);
   }
 
   @Get(':id')

@@ -1,4 +1,4 @@
-import { Controller, Get, Post, Body, Param, Put, Delete } from '@nestjs/common';
+import { Controller, Get, Post, Body, Param, Put, Delete, Query } from '@nestjs/common';
 import { StudentService } from './student.service';
 import { Student } from './student.entity';
 import { CreateStudentDto, UpdateStudentDto } from './student.dto';
@@ -13,8 +13,8 @@ export class StudentController {
   }
 
   @Get()
-  async findAll(): Promise<Student[]> {
-    return this.studentService.findAll();
+  async findAll(@Query() query: any): Promise<Student[]> {
+    return this.studentService.findAll(query);
   }
 
   @Get(':id')

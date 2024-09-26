@@ -21,6 +21,26 @@ __decorate([
     __metadata("design:type", Number)
 ], StudentInstructor.prototype, "studentInstructorId", void 0);
 __decorate([
+    (0, typeorm_1.CreateDateColumn)({ type: 'timestamp' }),
+    __metadata("design:type", Date)
+], StudentInstructor.prototype, "created_at", void 0);
+__decorate([
+    (0, typeorm_1.UpdateDateColumn)({ type: 'timestamp' }),
+    __metadata("design:type", Date)
+], StudentInstructor.prototype, "updated_at", void 0);
+__decorate([
+    (0, typeorm_1.DeleteDateColumn)({ type: 'timestamp', nullable: true }),
+    __metadata("design:type", Date)
+], StudentInstructor.prototype, "deleted_at", void 0);
+__decorate([
+    (0, typeorm_1.Column)({ length: 50, nullable: true }),
+    __metadata("design:type", String)
+], StudentInstructor.prototype, "created_by", void 0);
+__decorate([
+    (0, typeorm_1.Column)({ length: 50, nullable: true }),
+    __metadata("design:type", String)
+], StudentInstructor.prototype, "updated_by", void 0);
+__decorate([
     (0, typeorm_1.ManyToOne)(() => student_entity_1.Student, student => student.studentId, { onDelete: 'CASCADE' }),
     __metadata("design:type", student_entity_1.Student)
 ], StudentInstructor.prototype, "student", void 0);

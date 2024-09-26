@@ -17,9 +17,12 @@ const common_1 = require("@nestjs/common");
 const typeorm_1 = require("@nestjs/typeorm");
 const typeorm_2 = require("typeorm");
 const user_information_entity_1 = require("./user-information.entity");
+const paginationSearchSort_1 = require("../utils/paginationSearchSort");
+const bcrypt = require("bcryptjs");
 let UserInformationService = class UserInformationService {
-    constructor(dataSource) {
+    constructor(dataSource, userInformationRepository) {
         this.dataSource = dataSource;
+        this.userInformationRepository = userInformationRepository;
     }
     async create(createUserInformationDto) {
         const queryRunner = this.dataSource.createQueryRunner();
@@ -27,6 +30,7 @@ let UserInformationService = class UserInformationService {
         await queryRunner.startTransaction();
         try {
             const newUserInformation = this.dataSource.getRepository(user_information_entity_1.UserInformation).create(createUserInformationDto);
+            newUserInformation.password = bcrypt.hashSync(newUserInformation.password, 10);
             const savedUserInformation = await queryRunner.manager.save(newUserInformation);
             await queryRunner.commitTransaction();
             return savedUserInformation;
@@ -39,8 +43,14 @@ let UserInformationService = class UserInformationService {
             await queryRunner.release();
         }
     }
-    async findAll() {
+    async findAll(queryParams) {
+        const searchFields = ['firstName', 'lastName', 'email', 'address'];
+        const { skip, take, order, where } = (0, paginationSearchSort_1.applyPaginationSearchSort)(queryParams, searchFields);
         return this.dataSource.getRepository(user_information_entity_1.UserInformation).find({
+            skip,
+            take,
+            order,
+            where: where || {},
             relations: ['students', 'instructors'],
         });
     }
@@ -99,11 +109,24 @@ let UserInformationService = class UserInformationService {
             await queryRunner.release();
         }
     }
+    async findOneByEmail(email) {
+        return await this.userInformationRepository.findOne({ where: { email } });
+    }
+    async validateUser(email, pass) {
+        const entity = await this.findOneByEmail(email);
+        if (entity && bcrypt.compareSync(pass, entity.password)) {
+            const { password, ...result } = entity;
+            return result;
+        }
+        throw new common_1.UnauthorizedException('Invalid credentials');
+    }
 };
 exports.UserInformationService = UserInformationService;
 exports.UserInformationService = UserInformationService = __decorate([
     (0, common_1.Injectable)(),
     __param(0, (0, typeorm_1.InjectDataSource)()),
-    __metadata("design:paramtypes", [typeorm_2.DataSource])
+    __param(1, (0, typeorm_1.InjectRepository)(user_information_entity_1.UserInformation)),
+    __metadata("design:paramtypes", [typeorm_2.DataSource,
+        typeorm_2.Repository])
 ], UserInformationService);
 //# sourceMappingURL=user-information.service.js.map

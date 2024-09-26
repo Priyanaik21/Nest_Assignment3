@@ -4,6 +4,7 @@ export declare class CreateUserInformationDto {
     age: number;
     email: string;
     address: string;
+    password: string;
 }
 export declare class UpdateUserInformationDto {
     firstName?: string;
@@ -11,4 +12,5 @@ export declare class UpdateUserInformationDto {
     age?: number;
     email?: string;
     address?: string;
+    password?: string;
 }

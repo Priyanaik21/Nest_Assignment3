@@ -1,6 +1,8 @@
-import { Controller, Get, Post, Body, Param, Put, Delete } from '@nestjs/common';
+import { Controller, Get, Post, Body, Param, Put, Delete, Query } from '@nestjs/common';
 import { UserInformationService } from './user-information.service';
 import { CreateUserInformationDto, UpdateUserInformationDto } from './user-information.dto';
+import { UseGuards } from '@nestjs/common';
+import { JwtAuthGuard } from '../auth/jwt-auth.guard';
 
 @Controller('user-information')
 export class UserInformationController {
@@ -12,14 +14,15 @@ export class UserInformationController {
   }
 
   @Get()
-  async findAll() {
-    return this.userInformationService.findAll();
+  @UseGuards(JwtAuthGuard)
+  async findAll(@Query() query: any) {
+    return this.userInformationService.findAll(query);
   }
 
   @Get(':id')
-  async findOne(@Param('id') id: number) {
-    return this.userInformationService.findOne(id);
-  }
+async findOne(@Param('id') id:number) { 
+  return this.userInformationService.findOne(id); 
+}
 
   @Put(':id')
   async update(@Param('id') id: number, @Body() updateUserInformationDto: UpdateUserInformationDto) {

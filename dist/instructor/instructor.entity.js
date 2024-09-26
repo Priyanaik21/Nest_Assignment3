@@ -12,6 +12,7 @@ Object.defineProperty(exports, "__esModule", { value: true });
 exports.Instructor = void 0;
 const typeorm_1 = require("typeorm");
 const user_information_entity_1 = require("../user-information/user-information.entity");
+const instructor_department_entity_1 = require("../instructor_department/instructor_department.entity");
 let Instructor = class Instructor {
 };
 exports.Instructor = Instructor;
@@ -20,9 +21,33 @@ __decorate([
     __metadata("design:type", Number)
 ], Instructor.prototype, "instructorId", void 0);
 __decorate([
+    (0, typeorm_1.CreateDateColumn)({ type: 'timestamp' }),
+    __metadata("design:type", Date)
+], Instructor.prototype, "created_at", void 0);
+__decorate([
+    (0, typeorm_1.UpdateDateColumn)({ type: 'timestamp' }),
+    __metadata("design:type", Date)
+], Instructor.prototype, "updated_at", void 0);
+__decorate([
+    (0, typeorm_1.DeleteDateColumn)({ type: 'timestamp', nullable: true }),
+    __metadata("design:type", Date)
+], Instructor.prototype, "deleted_at", void 0);
+__decorate([
+    (0, typeorm_1.Column)({ length: 50, nullable: true }),
+    __metadata("design:type", String)
+], Instructor.prototype, "created_by", void 0);
+__decorate([
+    (0, typeorm_1.Column)({ length: 50, nullable: true }),
+    __metadata("design:type", String)
+], Instructor.prototype, "updated_by", void 0);
+__decorate([
     (0, typeorm_1.ManyToOne)(() => user_information_entity_1.UserInformation, (userInformation) => userInformation.instructors, { onDelete: 'CASCADE' }),
     __metadata("design:type", user_information_entity_1.UserInformation)
 ], Instructor.prototype, "userInformation", void 0);
+__decorate([
+    (0, typeorm_1.OneToMany)(() => instructor_department_entity_1.InstructorDepartment, (userInformation) => userInformation.instructor, { onDelete: 'CASCADE' }),
+    __metadata("design:type", instructor_department_entity_1.InstructorDepartment)
+], Instructor.prototype, "instructor_Id", void 0);
 exports.Instructor = Instructor = __decorate([
     (0, typeorm_1.Entity)()
 ], Instructor);

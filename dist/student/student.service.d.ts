@@ -8,7 +8,7 @@ export declare class StudentService {
     private readonly userInformationRepository;
     constructor(dataSource: DataSource, studentRepository: Repository<Student>, userInformationRepository: Repository<UserInformation>);
     create(createStudentDto: CreateStudentDto): Promise<Student>;
-    findAll(): Promise<Student[]>;
+    findAll(queryParams: any): Promise<Student[]>;
     findOne(id: number): Promise<Student>;
     update(id: number, updateStudentDto: UpdateStudentDto): Promise<void>;
     delete(id: number): Promise<void>;

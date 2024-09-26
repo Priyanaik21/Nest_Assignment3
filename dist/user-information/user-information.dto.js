@@ -42,6 +42,12 @@ __decorate([
     (0, class_validator_1.Length)(1, 100),
     __metadata("design:type", String)
 ], CreateUserInformationDto.prototype, "address", void 0);
+__decorate([
+    (0, class_validator_1.IsString)(),
+    (0, class_validator_1.IsNotEmpty)(),
+    (0, class_validator_1.MinLength)(6),
+    __metadata("design:type", String)
+], CreateUserInformationDto.prototype, "password", void 0);
 class UpdateUserInformationDto {
 }
 exports.UpdateUserInformationDto = UpdateUserInformationDto;
@@ -68,4 +74,10 @@ __decorate([
     (0, class_validator_1.Length)(1, 100),
     __metadata("design:type", String)
 ], UpdateUserInformationDto.prototype, "address", void 0);
+__decorate([
+    (0, class_validator_1.IsString)(),
+    (0, class_validator_1.MinLength)(6),
+    (0, class_validator_1.IsOptional)(),
+    __metadata("design:type", String)
+], UpdateUserInformationDto.prototype, "password", void 0);
 //# sourceMappingURL=user-information.dto.js.map

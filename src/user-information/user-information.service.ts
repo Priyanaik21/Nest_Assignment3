@@ -1,14 +1,18 @@
-import { Injectable, NotFoundException } from '@nestjs/common';
-import { InjectDataSource } from '@nestjs/typeorm';
-import { DataSource, QueryRunner } from 'typeorm';
+import { Injectable, NotFoundException, UnauthorizedException } from '@nestjs/common';
+import { InjectDataSource, InjectRepository } from '@nestjs/typeorm';
+import { DataSource, QueryRunner, Repository } from 'typeorm';
 import { UserInformation } from './user-information.entity';
 import { CreateUserInformationDto, UpdateUserInformationDto } from './user-information.dto';
+import { applyPaginationSearchSort } from '../utils/paginationSearchSort';
+import * as bcrypt from 'bcryptjs';
 
 @Injectable()
 export class UserInformationService {
   constructor(
     @InjectDataSource()
     private readonly dataSource: DataSource,
+    @InjectRepository(UserInformation)
+    private readonly userInformationRepository: Repository<UserInformation>,  
   ) {}
 
   async create(createUserInformationDto: CreateUserInformationDto): Promise<UserInformation> {
@@ -18,6 +22,8 @@ export class UserInformationService {
     await queryRunner.startTransaction();
     try {
       const newUserInformation = this.dataSource.getRepository(UserInformation).create(createUserInformationDto);
+
+      newUserInformation.password = bcrypt.hashSync(newUserInformation.password, 10); 
       const savedUserInformation = await queryRunner.manager.save(newUserInformation);
       await queryRunner.commitTransaction();
       return savedUserInformation;
@@ -29,15 +35,22 @@ export class UserInformationService {
     }
   }
 
-  async findAll(): Promise<UserInformation[]> {
+  async findAll(queryParams: any): Promise<UserInformation[]> {
+    const searchFields = ['firstName', 'lastName', 'email', 'address'];
+
+    const { skip, take, order, where } = applyPaginationSearchSort(queryParams,searchFields);
     return this.dataSource.getRepository(UserInformation).find({
-      relations: ['students', 'instructors'],
+      skip, 
+      take, 
+      order, 
+      where: where || {},
+      relations: ['students', 'instructors'], 
     });
   }
 
-  async findOne(id: number): Promise<UserInformation> {
+  async findOne(id:number): Promise<UserInformation> {
     const userInformation = await this.dataSource.getRepository(UserInformation).findOne({
-      where: { userId: id },
+      where: {userId:id },
       relations: ['students', 'instructors'],
     });
 
@@ -95,5 +108,17 @@ export class UserInformationService {
     } finally {
       await queryRunner.release();
     }
+  }
+  async findOneByEmail(email: string): Promise<UserInformation | undefined> {
+    return await this.userInformationRepository.findOne({ where: { email } });
+  }
+
+  async validateUser(email: string, pass: string): Promise<any> {
+    const entity = await this.findOneByEmail(email);
+    if (entity && bcrypt.compareSync(pass, entity.password)) {
+      const { password, ...result } = entity;
+      return result;
+    }
+    throw new UnauthorizedException('Invalid credentials');
   }
 }

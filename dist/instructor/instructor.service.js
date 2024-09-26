@@ -18,6 +18,7 @@ const typeorm_1 = require("@nestjs/typeorm");
 const typeorm_2 = require("typeorm");
 const instructor_entity_1 = require("./instructor.entity");
 const user_information_entity_1 = require("../user-information/user-information.entity");
+const paginationSearchSort_1 = require("../utils/paginationSearchSort");
 let InstructorService = class InstructorService {
     constructor(dataSource, instructorRepository, userInformationRepository) {
         this.dataSource = dataSource;
@@ -50,8 +51,14 @@ let InstructorService = class InstructorService {
             await queryRunner.release();
         }
     }
-    async findAll() {
+    async findAll(queryParams) {
+        const searchFields = ['instructorId'];
+        const { skip, take, order, where } = (0, paginationSearchSort_1.applyPaginationSearchSort)(queryParams, searchFields);
         return this.instructorRepository.find({
+            skip,
+            take,
+            order,
+            where: where || {},
             relations: ['userInformation'],
         });
     }

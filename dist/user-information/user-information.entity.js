@@ -41,6 +41,30 @@ __decorate([
     __metadata("design:type", String)
 ], UserInformation.prototype, "address", void 0);
 __decorate([
+    (0, typeorm_1.Column)(),
+    __metadata("design:type", String)
+], UserInformation.prototype, "password", void 0);
+__decorate([
+    (0, typeorm_1.CreateDateColumn)({ type: 'timestamp' }),
+    __metadata("design:type", Date)
+], UserInformation.prototype, "created_at", void 0);
+__decorate([
+    (0, typeorm_1.UpdateDateColumn)({ type: 'timestamp' }),
+    __metadata("design:type", Date)
+], UserInformation.prototype, "updated_at", void 0);
+__decorate([
+    (0, typeorm_1.DeleteDateColumn)({ type: 'timestamp', nullable: true }),
+    __metadata("design:type", Date)
+], UserInformation.prototype, "deleted_at", void 0);
+__decorate([
+    (0, typeorm_1.Column)({ length: 50, nullable: true }),
+    __metadata("design:type", String)
+], UserInformation.prototype, "created_by", void 0);
+__decorate([
+    (0, typeorm_1.Column)({ length: 50, nullable: true }),
+    __metadata("design:type", String)
+], UserInformation.prototype, "updated_by", void 0);
+__decorate([
     (0, typeorm_1.OneToMany)(() => student_entity_1.Student, student => student.userInformation),
     __metadata("design:type", Array)
 ], UserInformation.prototype, "students", void 0);

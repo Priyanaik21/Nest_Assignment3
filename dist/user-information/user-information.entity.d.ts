@@ -7,6 +7,12 @@ export declare class UserInformation {
     age: number;
     email: string;
     address: string;
+    password: string;
+    created_at: Date;
+    updated_at: Date;
+    deleted_at: Date;
+    created_by: string;
+    updated_by: string;
     students: Student[];
     instructors: Instructor[];
 }

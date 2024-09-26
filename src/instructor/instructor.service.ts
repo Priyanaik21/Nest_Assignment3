@@ -4,6 +4,7 @@ import { DataSource, Repository } from 'typeorm';
 import { Instructor } from './instructor.entity';
 import { CreateInstructorDto, UpdateInstructorDto } from './instructor.dto';
 import { UserInformation } from '../user-information/user-information.entity';
+import { applyPaginationSearchSort } from 'src/utils/paginationSearchSort';
 
 @Injectable()
 export class InstructorService {
@@ -45,12 +46,18 @@ export class InstructorService {
     }
   }
 
-  async findAll(): Promise<Instructor[]> {
+  async findAll(queryParams: any): Promise<Instructor[]> {
+    const searchFields = ['instructorId'];
+    const { skip, take, order, where } = applyPaginationSearchSort(queryParams, searchFields);
     return this.instructorRepository.find({
+      skip, 
+      take, 
+      order, 
+      where: where || {},
       relations: ['userInformation'],
+
     });
   }
-
   async findOne(id: number): Promise<Instructor> {
     const instructor = await this.instructorRepository.findOne({
       where: { instructorId: id },

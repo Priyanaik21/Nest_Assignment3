@@ -22,6 +22,7 @@ exports.UserInformationModule = UserInformationModule = __decorate([
         imports: [typeorm_1.TypeOrmModule.forFeature([user_information_entity_1.UserInformation, student_entity_1.Student, instructor_entity_1.Instructor])],
         providers: [user_information_service_1.UserInformationService],
         controllers: [user_information_controller_1.UserInformationController],
+        exports: [user_information_service_1.UserInformationService],
     })
 ], UserInformationModule);
 //# sourceMappingURL=user-information.module.js.map

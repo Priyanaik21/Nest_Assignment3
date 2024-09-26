@@ -23,8 +23,8 @@ let InstructorController = class InstructorController {
     async create(createInstructorDto) {
         return this.instructorService.create(createInstructorDto);
     }
-    async findAll() {
-        return this.instructorService.findAll();
+    async findAll(query) {
+        return this.instructorService.findAll(query);
     }
     async findOne(id) {
         return this.instructorService.findOne(id);
@@ -46,8 +46,9 @@ __decorate([
 ], InstructorController.prototype, "create", null);
 __decorate([
     (0, common_1.Get)(),
+    __param(0, (0, common_1.Query)()),
     __metadata("design:type", Function),
-    __metadata("design:paramtypes", []),
+    __metadata("design:paramtypes", [Object]),
     __metadata("design:returntype", Promise)
 ], InstructorController.prototype, "findAll", null);
 __decorate([

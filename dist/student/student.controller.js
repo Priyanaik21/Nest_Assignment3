@@ -23,8 +23,8 @@ let StudentController = class StudentController {
     async create(createStudentDto) {
         return this.studentService.create(createStudentDto);
     }
-    async findAll() {
-        return this.studentService.findAll();
+    async findAll(query) {
+        return this.studentService.findAll(query);
     }
     async findOne(id) {
         return this.studentService.findOne(id);
@@ -46,8 +46,9 @@ __decorate([
 ], StudentController.prototype, "create", null);
 __decorate([
     (0, common_1.Get)(),
+    __param(0, (0, common_1.Query)()),
     __metadata("design:type", Function),
-    __metadata("design:paramtypes", []),
+    __metadata("design:paramtypes", [Object]),
     __metadata("design:returntype", Promise)
 ], StudentController.prototype, "findAll", null);
 __decorate([

@@ -8,7 +8,7 @@ export declare class InstructorService {
     private readonly userInformationRepository;
     constructor(dataSource: DataSource, instructorRepository: Repository<Instructor>, userInformationRepository: Repository<UserInformation>);
     create(createInstructorDto: CreateInstructorDto): Promise<Instructor>;
-    findAll(): Promise<Instructor[]>;
+    findAll(queryParams: any): Promise<Instructor[]>;
     findOne(id: number): Promise<Instructor>;
     update(id: number, updateInstructorDto: UpdateInstructorDto): Promise<void>;
     delete(id: number): Promise<void>;

@@ -5,7 +5,7 @@ export declare class StudentController {
     private readonly studentService;
     constructor(studentService: StudentService);
     create(createStudentDto: CreateStudentDto): Promise<Student>;
-    findAll(): Promise<Student[]>;
+    findAll(query: any): Promise<Student[]>;
     findOne(id: number): Promise<Student>;
     update(id: number, updateStudentDto: UpdateStudentDto): Promise<void>;
     delete(id: number): Promise<void>;

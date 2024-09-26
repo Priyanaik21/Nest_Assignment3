@@ -16,6 +16,8 @@ exports.UserInformationController = void 0;
 const common_1 = require("@nestjs/common");
 const user_information_service_1 = require("./user-information.service");
 const user_information_dto_1 = require("./user-information.dto");
+const common_2 = require("@nestjs/common");
+const jwt_auth_guard_1 = require("../auth/jwt-auth.guard");
 let UserInformationController = class UserInformationController {
     constructor(userInformationService) {
         this.userInformationService = userInformationService;
@@ -23,8 +25,8 @@ let UserInformationController = class UserInformationController {
     async create(createUserInformationDto) {
         return this.userInformationService.create(createUserInformationDto);
     }
-    async findAll() {
-        return this.userInformationService.findAll();
+    async findAll(query) {
+        return this.userInformationService.findAll(query);
     }
     async findOne(id) {
         return this.userInformationService.findOne(id);
@@ -46,8 +48,10 @@ __decorate([
 ], UserInformationController.prototype, "create", null);
 __decorate([
     (0, common_1.Get)(),
+    (0, common_2.UseGuards)(jwt_auth_guard_1.JwtAuthGuard),
+    __param(0, (0, common_1.Query)()),
     __metadata("design:type", Function),
-    __metadata("design:paramtypes", []),
+    __metadata("design:paramtypes", [Object]),
     __metadata("design:returntype", Promise)
 ], UserInformationController.prototype, "findAll", null);
 __decorate([
